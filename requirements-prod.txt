@@ -1,0 +1,11 @@
+# =============================================================================
+# CivicPulse — Production Server Dependencies (Linux VPS)
+#
+# Extends standard backend requirements with production ASGI process manager.
+# Install with: pip install -r requirements-prod.txt
+# =============================================================================
+
+-r requirements.txt
+
+# Production ASGI Process Manager (Linux VPS)
+gunicorn>=22.0.0

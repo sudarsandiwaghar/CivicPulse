@@ -1,0 +1,63 @@
+# ============================================================
+# CivicPulse .gitignore
+# Excludes environment secrets, compiled files, uploads,
+# IDE configs, and OS-specific metadata from version control.
+# ============================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# --- Virtual Environment ---
+venv/
+.venv/
+env/
+
+# --- Environment & Secrets ---
+# CRITICAL: Never commit secrets to version control
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.env.local
+*.pem
+*.key
+
+# --- File Uploads (user-generated content) ---
+uploads/
+!uploads/.gitkeep
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- Testing ---
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# --- Temporary & Scratch ---
+scratch/
+
+# --- Alembic ---
+# Migration versions ARE tracked; only temp files excluded
+alembic/tmp/
+
+# --- Logs ---
+*.log
+logs/

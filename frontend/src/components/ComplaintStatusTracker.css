@@ -1,0 +1,131 @@
+.status-tracker-root {
+  width: 100%;
+  padding: var(--space-4) 0;
+}
+
+.tracker-stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+}
+
+.tracker-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+  text-align: center;
+}
+
+.tracker-step-indicator {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.tracker-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  z-index: 2;
+  margin: 0 auto;
+  transition: all var(--transition-fast);
+}
+
+.tracker-step.pending .tracker-step-circle {
+  background-color: var(--color-bg-card);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.tracker-step.current .tracker-step-circle {
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  color: var(--color-text-inverse);
+  box-shadow: 0 0 0 4px var(--color-bg-active-nav);
+}
+
+.tracker-step.completed .tracker-step-circle {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-secondary);
+  color: var(--color-text-inverse);
+}
+
+.tracker-step-connector {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  right: -50%;
+  height: 2px;
+  background-color: var(--color-border);
+  z-index: 1;
+}
+
+.tracker-step.completed .tracker-step-connector {
+  background-color: var(--color-secondary);
+}
+
+.tracker-step-label {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  max-width: 100px;
+  line-height: 1.25;
+}
+
+.tracker-step.current .tracker-step-label {
+  color: var(--color-primary);
+  font-weight: var(--weight-bold);
+}
+
+.tracker-step.completed .tracker-step-label {
+  color: var(--color-text-main);
+}
+
+.tracker-special-status {
+  padding: var(--space-4);
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.tracker-special-badge.negative {
+  color: #B91C1C;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tracker-special-desc {
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  color: #7F1D1D;
+}
+
+@media (max-width: 640px) {
+  .tracker-step-label {
+    font-size: 10px;
+    max-width: 60px;
+  }
+  .tracker-step-circle {
+    width: 26px;
+    height: 26px;
+    font-size: 10px;
+  }
+  .tracker-step-connector {
+    top: 13px;
+  }
+}

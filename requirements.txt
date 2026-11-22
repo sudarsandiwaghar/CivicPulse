@@ -1,0 +1,40 @@
+# =============================================================================
+# CivicPulse — Python Dependencies
+#
+# Core backend dependencies for the CivicPulse civic-tech platform.
+# Install with: pip install -r requirements.txt
+#
+# Versions are pinned to the minor level for reproducibility while allowing
+# patch-level updates. Exact pins (==) are used for critical packages.
+# =============================================================================
+
+# --- Web Framework & Process Management ---
+fastapi>=0.162.0
+uvicorn[standard]>=0.54.0          # ASGI server with --reload support
+gunicorn>=22.0.0; sys_platform != "win32"  # Production process manager (Linux/macOS)
+
+# --- Data Validation & Settings ---
+pydantic>=2.14.0
+pydantic-settings>=2.16.0         # Environment-based configuration
+email-validator>=2.3.0            # Email field validation in Pydantic
+
+# --- Database ---
+sqlalchemy>=2.1.0                 # ORM and query builder
+psycopg2-binary>=2.9.0            # PostgreSQL adapter (binary for dev)
+alembic>=1.20.0                   # Database migration management
+
+# --- Authentication & Security ---
+passlib[bcrypt]>=1.7.4            # Password hashing abstraction
+bcrypt>=4.0.0                     # Bcrypt backend for Passlib
+PyJWT>=2.15.0                     # JSON Web Token encoding/decoding
+
+# --- File Handling ---
+python-multipart>=0.0.33          # Multipart form data (file uploads)
+pillow>=13.0.0                    # Image processing and thumbnails
+
+# --- HTTP Client ---
+httpx>=0.28.0                     # Async/sync HTTP client, also used in tests
+
+# --- Testing ---
+pytest>=8.0.0                     # Test framework
+pytest-asyncio>=0.25.0            # Async test support

@@ -1,0 +1,75 @@
+# =============================================================================
+# CivicPulse — Systemd Service Unit for Production Backend
+#
+# Target File Location on Server: /etc/systemd/system/civicpulse-backend.service
+#
+# Commands to install and start:
+#   sudo cp deploy/systemd/civicpulse-backend.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable civicpulse-backend
+#   sudo systemctl start civicpulse-backend
+#   sudo systemctl status civicpulse-backend
+# =============================================================================
+
+[Unit]
+Description=CivicPulse Municipal Management Platform ASGI Backend
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=exec
+User=civicpulse
+Group=civicpulse
+
+# Application directory and environment file
+WorkingDirectory=/var/www/civicpulse
+EnvironmentFile=/var/www/civicpulse/.env
+Environment="PYTHONUNBUFFERED=1"
+Environment="PYTHONDONTWRITEBYTECODE=1"
+
+# Automatically create /var/log/civicpulse owned by civicpulse:civicpulse
+LogsDirectory=civicpulse
+
+# Gunicorn execution command running Uvicorn ASGI workers:
+# - Workers: Recommended 2 * CPU_CORES + 1 (configured for 4 workers)
+# - Worker Class: uvicorn.workers.UvicornWorker
+# - Socket Binding: 127.0.0.1:8000 (Internal loopback only)
+ExecStart=/var/www/civicpulse/venv/bin/gunicorn app.main:app \
+    --workers 4 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --bind 127.0.0.1:8000 \
+    --timeout 60 \
+    --graceful-timeout 30 \
+    --keep-alive 5 \
+    --access-logfile /var/log/civicpulse/access.log \
+    --error-logfile /var/log/civicpulse/error.log \
+    --log-level info
+
+# Reload configuration gracefully without dropping active connections
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Process Lifecycle & Restart Policy
+KillMode=mixed
+TimeoutStopSec=30
+Restart=always
+RestartSec=5s
+
+# Security Sandbox Hardening Directives
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=true
+LockPersonality=true
+
+# Read-Write directories permitted for service user
+ReadWritePaths=/var/www/civicpulse/uploads /var/log/civicpulse
+
+# Resource Limits
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
