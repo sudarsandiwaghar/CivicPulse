@@ -128,6 +128,11 @@ export const AssignmentModal = ({
             <div className="dialog-reason-group">
               <label className="dialog-label">
                 Select Field Technician <span className="required-star">*</span>
+                {complaint?.department_name && (
+                  <span style={{ fontWeight: 400, marginLeft: 6, color: "var(--color-text-muted)", fontSize: "var(--text-xs)" }}>
+                    (Target Dept: <strong>{complaint.department_name}</strong>)
+                  </span>
+                )}
               </label>
 
               {workersLoading ? (
@@ -136,6 +141,12 @@ export const AssignmentModal = ({
                   <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
                     Loading available workers...
                   </span>
+                </div>
+              ) : workers.length === 0 ? (
+                <div style={{ marginTop: 4 }}>
+                  <Alert variant="warning">
+                    No active field technicians found in the system. Please register field workers in the Workers section before assigning complaints.
+                  </Alert>
                 </div>
               ) : (
                 <select
@@ -156,13 +167,21 @@ export const AssignmentModal = ({
                   }}
                 >
                   <option value="">-- Choose Eligible Technician --</option>
-                  {workers
+                  {[...workers]
                     .filter((w) => mode !== "reassign" || w.id !== currentWorkerId)
-                    .map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.full_name || "Technician"} ({w.employee_id}) — {w.department_name || "Department"} {w.designation ? `• ${w.designation}` : ""}
-                      </option>
-                    ))}
+                    .sort((a, b) => {
+                      const aMatch = complaint?.department_id && a.department_id === complaint.department_id ? 1 : 0;
+                      const bMatch = complaint?.department_id && b.department_id === complaint.department_id ? 1 : 0;
+                      return bMatch - aMatch;
+                    })
+                    .map((w) => {
+                      const isDeptMatch = complaint?.department_id && w.department_id === complaint.department_id;
+                      return (
+                        <option key={w.id} value={w.id}>
+                          {isDeptMatch ? "[Dept Match] " : ""}{w.full_name || "Technician"} ({w.employee_id}) — {w.department_name || "Department"}{w.designation ? ` • ${w.designation}` : ""}
+                        </option>
+                      );
+                    })}
                 </select>
               )}
             </div>

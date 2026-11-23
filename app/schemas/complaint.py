@@ -189,6 +189,8 @@ class ComplaintResponse(BaseModel):
     citizen_name: str | None = Field(default=None, description="Full name of reporting citizen")
     category_id: int = Field(..., description="Assigned issue category ID")
     category_name: str | None = Field(default=None, description="Name of assigned category")
+    department_id: int | None = Field(default=None, description="Assigned municipal department ID")
+    department_name: str | None = Field(default=None, description="Name of assigned municipal department")
     location: LocationResponse | None = Field(default=None, description="Incident location data")
     title: str = Field(..., description="Complaint summary title")
     description: str = Field(..., description="Detailed complaint description")
@@ -211,6 +213,14 @@ class ComplaintResponse(BaseModel):
     @classmethod
     def resolve_category_name(cls, v: Any) -> str | None:
         """Extract category name if category relationship is loaded."""
+        if hasattr(v, "name"):
+            return v.name
+        return v
+
+    @field_validator("department_name", mode="before")
+    @classmethod
+    def resolve_department_name(cls, v: Any) -> str | None:
+        """Extract department name if department relationship is loaded."""
         if hasattr(v, "name"):
             return v.name
         return v

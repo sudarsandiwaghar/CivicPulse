@@ -95,6 +95,14 @@ def _format_complaint(c: Complaint, include_history: bool = False) -> dict[str, 
             )
             history_data.append(entry.model_dump(mode="json"))
 
+    dept_id = None
+    dept_name = None
+    if c.category:
+        dept_id = getattr(c.category, "department_id", None)
+        dept_obj = getattr(c.category, "department", None)
+        if dept_obj:
+            dept_name = getattr(dept_obj, "name", None)
+
     resp = ComplaintResponse(
         id=c.id,
         complaint_number=c.complaint_number,
@@ -102,6 +110,8 @@ def _format_complaint(c: Complaint, include_history: bool = False) -> dict[str, 
         citizen_name=c.citizen.full_name if c.citizen else None,
         category_id=c.category_id,
         category_name=c.category.name if c.category else None,
+        department_id=dept_id,
+        department_name=dept_name,
         location=loc_data,
         title=c.title,
         description=c.description,

@@ -224,10 +224,10 @@ export const AdminDashboardPage = () => {
             <div style={{ marginTop: "var(--space-6)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "var(--space-3)" }}>
                 <h2 style={{ fontSize: "var(--text-lg)", fontWeight: "var(--weight-bold)", color: "var(--color-tertiary)", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#DC2626" }}>●</span> Urgent Complaints Requiring Direct Oversight
+                  <span style={{ color: "#DC2626" }}>●</span> Critical Complaints Requiring Direct Oversight
                 </h2>
-                <Link to="/admin/complaints?priority=URGENT" style={{ fontSize: "var(--text-xs)", fontWeight: "bold", color: "var(--color-primary)", textDecoration: "none" }}>
-                  View All Urgent &rarr;
+                <Link to="/admin/complaints?priority=CRITICAL" style={{ fontSize: "var(--text-xs)", fontWeight: "bold", color: "var(--color-primary)", textDecoration: "none" }}>
+                  View All Critical &rarr;
                 </Link>
               </div>
 
@@ -255,7 +255,7 @@ export const AdminDashboardPage = () => {
                         </span>
                         <StatusBadge status={comp.status} />
                         <span style={{ fontSize: "10px", fontWeight: "bold", backgroundColor: "#fee2e2", color: "#991b1b", padding: "2px 6px", borderRadius: 4 }}>
-                          URGENT
+                          {comp.priority || "CRITICAL"}
                         </span>
                         <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
                           {comp.category_name}

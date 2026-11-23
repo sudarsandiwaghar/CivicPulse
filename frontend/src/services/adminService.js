@@ -333,7 +333,7 @@ export const adminService = {
       adminService.listComplaints({ status: "CLOSED", page: 1, page_size: 1 }),
       adminService.listComplaints({ status: "REJECTED", page: 1, page_size: 1 }),
       adminService.listComplaints({ page: 1, page_size: 6, sort_by: "created_at", sort_order: "desc" }),
-      adminService.listComplaints({ priority: "URGENT", page: 1, page_size: 5, sort_by: "created_at", sort_order: "desc" }),
+      adminService.listComplaints({ priority: "CRITICAL", page: 1, page_size: 5, sort_by: "created_at", sort_order: "desc" }),
     ]);
 
     return {
