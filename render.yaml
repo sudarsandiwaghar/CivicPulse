@@ -39,7 +39,7 @@ services:
       - key: DB_SSLMODE
         value: require
       - key: UPLOAD_DIR
-        value: /tmp/uploads
+        value: /tmp/civicpulse/uploads
       - key: MAX_UPLOAD_SIZE_MB
         value: "10"
       - key: RATE_LIMIT_PER_MINUTE

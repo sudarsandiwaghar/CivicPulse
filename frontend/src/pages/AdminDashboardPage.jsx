@@ -107,7 +107,7 @@ export const AdminDashboardPage = () => {
       {/* Error state */}
       {error && (
         <Alert variant="error" title="Dashboard Error">
-          {error}
+          {typeof error === "string" ? error : (error?.message || JSON.stringify(error))}
           <div style={{ marginTop: "var(--space-2)" }}>
             <Button variant="outline" size="sm" onClick={fetchDashboardData}>
               Retry Loading Dashboard

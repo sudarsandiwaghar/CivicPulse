@@ -72,7 +72,7 @@ export const adminService = {
    * @returns {Promise<Object>} Updated ComplaintResponse
    */
   reviewComplaint: async (complaintId, payload) => {
-    const res = await api.post(`/complaints/${complaintId}/review`, payload);
+    const res = await api.patch(`/complaints/${complaintId}/review`, payload);
     return res.data;
   },
 

@@ -710,3 +710,28 @@ class TestPhase811RenderDeploymentConfiguration:
         assert prod_client.get("/docs").status_code == 404
         assert prod_client.get("/redoc").status_code == 404
         assert prod_client.get("/openapi.json").status_code == 404
+
+    def test_python_runtime_pinning_files(self):
+        """Repository must provide .python-version and runtime.txt pinned to Python 3.11.9."""
+        py_version_file = Path(".python-version")
+        assert py_version_file.exists(), ".python-version must exist"
+        assert py_version_file.read_text(encoding="utf-8").strip() == "3.11.9"
+
+        runtime_file = Path("runtime.txt")
+        assert runtime_file.exists(), "runtime.txt must exist"
+        assert runtime_file.read_text(encoding="utf-8").strip() == "python-3.11.9"
+
+    def test_upload_dir_sanitizes_var_www_to_tmp(self):
+        """Settings must automatically sanitize /var/www paths to /tmp scratch space when unprivileged."""
+        settings = Settings(
+            UPLOAD_DIR="/var/www/civicpulse/uploads",
+            DB_USER="usr",
+            DB_PASSWORD="pwd",
+            JWT_SECRET_KEY="test_jwt_secret_key_at_least_32_bytes_long_here",
+        )
+        assert settings.UPLOAD_DIR == "/tmp/civicpulse/uploads"
+
+    def test_render_yaml_upload_dir_configuration(self):
+        """render.yaml must configure UPLOAD_DIR to /tmp/civicpulse/uploads."""
+        content = Path("render.yaml").read_text(encoding="utf-8")
+        assert "/tmp/civicpulse/uploads" in content

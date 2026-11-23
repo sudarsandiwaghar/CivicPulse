@@ -107,7 +107,10 @@ export const AdminComplaintDetailPage = () => {
     } catch (err) {
       setActionFeedback({
         type: "error",
-        message: err.message || "Failed to update complaint status.",
+        message:
+          typeof err?.message === "string"
+            ? err.message
+            : "Failed to update complaint status.",
       });
     } finally {
       setActionLoading(false);
@@ -119,7 +122,22 @@ export const AdminComplaintDetailPage = () => {
     setActionLoading(true);
     setActionFeedback(null);
     try {
-      await adminService.reviewComplaint(id, payload);
+      const reviewPayload = {
+        reason: payload.reason || undefined,
+        priority: payload.priority || undefined,
+        category_id: payload.categoryId !== undefined ? payload.categoryId : payload.category_id,
+        original_complaint_id: payload.originalComplaintId || payload.original_complaint_id || undefined,
+      };
+      if (
+        payload.actionType &&
+        ["UNDER_REVIEW", "REJECTED", "DUPLICATE", "ON_HOLD"].includes(payload.actionType)
+      ) {
+        reviewPayload.new_status = payload.actionType;
+      } else if (payload.new_status) {
+        reviewPayload.new_status = payload.new_status;
+      }
+
+      await adminService.reviewComplaint(id, reviewPayload);
       setIsTriageModalOpen(false);
       setActionFeedback({
         type: "success",
@@ -129,7 +147,10 @@ export const AdminComplaintDetailPage = () => {
     } catch (err) {
       setActionFeedback({
         type: "error",
-        message: err.message || "Failed to apply triage action.",
+        message:
+          typeof err?.message === "string"
+            ? err.message
+            : "Failed to apply triage action.",
       });
     } finally {
       setActionLoading(false);

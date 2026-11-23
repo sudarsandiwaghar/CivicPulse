@@ -200,12 +200,34 @@ class Settings(BaseSettings):
     )
 
     # ---- File Uploads --------------------------------------------------------
-    UPLOAD_DIR: str = "uploads"
+    UPLOAD_DIR: str = Field(
+        default="uploads",
+        validation_alias=AliasChoices("UPLOAD_DIR", "CIVICPULSE_UPLOAD_DIR"),
+    )
     MAX_UPLOAD_SIZE_MB: int = 10
     ALLOWED_EXTENSIONS: list[str] = [
         ".jpg", ".jpeg", ".png", ".gif",  # Images
         ".pdf", ".doc", ".docx",          # Documents
     ]
+
+    @field_validator("UPLOAD_DIR", mode="after")
+    @classmethod
+    def sanitize_upload_dir(cls, v: str) -> str:
+        """
+        Validate and sanitize upload directory path.
+        In containerized, PaaS, or non-root environments where /var/www is configured
+        (e.g. copied from a VPS deployment template) but not writable or non-existent,
+        safely reroute to a writable temporary scratch directory (/tmp/civicpulse/uploads).
+        """
+        if v and v.startswith("/var/www"):
+            import os
+            try:
+                # If /var/www does not exist or is not writable by current user
+                if not os.path.exists("/var/www") or not os.access("/var/www", os.W_OK):
+                    return "/tmp/civicpulse/uploads"
+            except Exception:
+                return "/tmp/civicpulse/uploads"
+        return v
 
     # ---- Rate Limiting -------------------------------------------------------
     RATE_LIMIT_PER_MINUTE: int = 60

@@ -113,9 +113,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Ensure the upload directory exists for local file storage
     upload_dir = settings.UPLOAD_DIR
-    if not os.path.exists(upload_dir):
-        os.makedirs(upload_dir, exist_ok=True)
-        logger.info("Created upload directory: %s", upload_dir)
+    try:
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir, exist_ok=True)
+            logger.info("Created upload directory: %s", upload_dir)
+    except (PermissionError, OSError) as exc:
+        fallback_dir = "/tmp/civicpulse/uploads"
+        logger.warning(
+            "Failed to create upload directory '%s' due to permission restriction (%s). "
+            "Falling back to writable temporary directory: %s",
+            upload_dir,
+            exc,
+            fallback_dir,
+        )
+        os.makedirs(fallback_dir, exist_ok=True)
+        object.__setattr__(settings, "UPLOAD_DIR", fallback_dir)
+        logger.info("Created fallback upload directory: %s", fallback_dir)
 
     logger.info("Application startup complete")
 
@@ -163,6 +176,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"^https://.*\.pages\.dev$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],

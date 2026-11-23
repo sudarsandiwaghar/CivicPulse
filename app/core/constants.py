@@ -150,6 +150,20 @@ class PriorityLevel(str, Enum):
     HIGH = "HIGH"
     CRITICAL = "CRITICAL"
 
+    # Backward compatibility / alias for frontend triage queues
+    URGENT = "CRITICAL"
+
+    @classmethod
+    def _missing_(cls, value: object):
+        if isinstance(value, str):
+            upper_val = value.upper()
+            if upper_val == "URGENT":
+                return cls.CRITICAL
+            for member in cls:
+                if member.value == upper_val:
+                    return member
+        return None
+
 
 # =============================================================================
 # Notification Types
