@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "civicpulse",
+  "name": "civicpulse1",
   "compatibility_date": "2026-03-01",
   "assets": {
     "directory": "./dist",
