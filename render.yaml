@@ -29,7 +29,7 @@ services:
       - key: REFRESH_TOKEN_EXPIRE_DAYS
         value: "7"
       - key: CORS_ORIGINS
-        value: https://civicpulse.pages.dev,http://localhost:5173
+        value: https://civicpulse1.sudarsandiwaghar.workers.dev,https://civicpulse.sudarsandiwaghar.workers.dev,https://civicpulse.pages.dev,http://localhost:5173
       - key: DB_POOL_SIZE
         value: "5"
       - key: DB_MAX_OVERFLOW

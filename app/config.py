@@ -96,7 +96,12 @@ class Settings(BaseSettings):
 
     # ---- API & CORS ----------------------------------------------------------
     API_V1_PREFIX: str = "/api/v1"
-    CORS_ORIGINS: list[str] | str = ["http://localhost:5173"]
+    CORS_ORIGINS: list[str] | str = [
+        "http://localhost:5173",
+        "https://civicpulse1.sudarsandiwaghar.workers.dev",
+        "https://civicpulse.sudarsandiwaghar.workers.dev",
+        "https://civicpulse.pages.dev",
+    ]
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
