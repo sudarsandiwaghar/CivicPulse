@@ -14,20 +14,39 @@
 
 import { api } from "./apiClient";
 
+let cachedDepartments = null;
+let cacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000;
+
 export const departmentService = {
   /**
    * Retrieve all registered municipal departments with optional active status filter.
    *
    * @param {boolean} [isActive] Optional filter by active status
+   * @param {boolean} [forceRefresh=false]
    * @returns {Promise<Array<Object>>} List of DepartmentResponse objects
    */
-  listDepartments: async (isActive) => {
+  listDepartments: async (isActive, forceRefresh = false) => {
+    const now = Date.now();
+    if (!forceRefresh && typeof isActive !== "boolean" && cachedDepartments && now - cacheTime < CACHE_TTL) {
+      return cachedDepartments;
+    }
     let endpoint = "/departments/";
     if (typeof isActive === "boolean") {
       endpoint += `?is_active=${isActive}`;
     }
     const res = await api.get(endpoint);
-    return res.data || [];
+    const data = res.data || [];
+    if (typeof isActive !== "boolean") {
+      cachedDepartments = data;
+      cacheTime = now;
+    }
+    return data;
+  },
+
+  invalidateCache: () => {
+    cachedDepartments = null;
+    cacheTime = 0;
   },
 
   /**
@@ -55,6 +74,7 @@ export const departmentService = {
    */
   createDepartment: async (payload) => {
     const res = await api.post("/departments/", payload);
+    departmentService.invalidateCache();
     return res.data;
   },
 
@@ -67,6 +87,7 @@ export const departmentService = {
    */
   updateDepartment: async (departmentId, payload) => {
     const res = await api.patch(`/departments/${departmentId}`, payload);
+    departmentService.invalidateCache();
     return res.data;
   },
 
@@ -78,6 +99,7 @@ export const departmentService = {
    */
   deactivateDepartment: async (departmentId) => {
     const res = await api.patch(`/departments/${departmentId}/deactivate`);
+    departmentService.invalidateCache();
     return res.data;
   },
 };

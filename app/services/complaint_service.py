@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from sqlalchemy import or_, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.constants import (
     COMPLAINT_STATUS_TRANSITIONS,
@@ -197,7 +197,16 @@ def get_complaint_by_id(
         EntityNotFoundError: If complaint does not exist.
         AuthorizationError: If citizen attempts to view another citizen's complaint.
     """
-    complaint = db.query(Complaint).filter(Complaint.id == complaint_id).first()
+    complaint = (
+        db.query(Complaint)
+        .options(
+            joinedload(Complaint.category).joinedload(Category.department),
+            joinedload(Complaint.citizen),
+            joinedload(Complaint.location),
+        )
+        .filter(Complaint.id == complaint_id)
+        .first()
+    )
     if not complaint:
         raise EntityNotFoundError("Complaint", complaint_id)
 
@@ -254,7 +263,16 @@ def list_complaints(
     if user_role == UserRole.FIELD_WORKER.value:
         raise AuthorizationError("Worker complaint task endpoints will be available in Phase 5")
 
-    query = db.query(Complaint).join(Complaint.category).outerjoin(Complaint.location)
+    query = (
+        db.query(Complaint)
+        .options(
+            joinedload(Complaint.category).joinedload(Category.department),
+            joinedload(Complaint.citizen),
+            joinedload(Complaint.location),
+        )
+        .join(Complaint.category)
+        .outerjoin(Complaint.location)
+    )
 
     # Apply role scoping
     if user_role == UserRole.CITIZEN.value:

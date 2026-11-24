@@ -15,7 +15,7 @@ Security policies:
 import logging
 from typing import Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.config import get_settings
 from app.core.constants import UserRole
@@ -64,6 +64,9 @@ def init_roles(db: Session) -> dict[str, Role]:
     existing_roles = db.query(Role).all()
     for r in existing_roles:
         roles_map[r.name] = r
+
+    if len(roles_map) >= len(INITIAL_ROLES):
+        return roles_map
 
     created_any = False
     for role_def in INITIAL_ROLES:
@@ -180,7 +183,12 @@ def authenticate_user(db: Session, request: UserLoginRequest) -> User:
     Raises:
         AuthenticationError: If credentials fail or account is inactive.
     """
-    user = db.query(User).filter(User.email == request.email).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.email == request.email)
+        .first()
+    )
 
     # Constant-time security check: verify password even if user is not found
     # to resist timing-based account enumeration attacks.

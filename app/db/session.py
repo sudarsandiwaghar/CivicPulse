@@ -62,6 +62,16 @@ def init_engine() -> None:
         settings.DB_SSLMODE or "default",
     )
 
+    connect_args = {}
+    if "postgresql" in settings.DATABASE_URL:
+        connect_args = {
+            "connect_timeout": 10,
+            "keepalives": 1,
+            "keepalives_idle": 30,
+            "keepalives_interval": 10,
+            "keepalives_count": 5,
+        }
+
     _engine = create_engine(
         settings.DATABASE_URL,
         # pool_pre_ping sends a lightweight "SELECT 1" before reusing a
@@ -73,6 +83,8 @@ def init_engine() -> None:
         pool_size=settings.DB_POOL_SIZE,
         max_overflow=settings.DB_MAX_OVERFLOW,
         pool_timeout=settings.DB_POOL_TIMEOUT,
+        pool_recycle=300,
+        connect_args=connect_args,
     )
 
     _SessionFactory = sessionmaker(

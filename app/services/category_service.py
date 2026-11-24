@@ -5,7 +5,7 @@ Handles civic issue classification categories and responsible municipal departme
 Provides idempotent data seeding and safe category lookups.
 """
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.exceptions import EntityNotFoundError
 from app.models.category import Category
@@ -92,6 +92,11 @@ def init_categories(db: Session) -> None:
     """
     Idempotently seeds standard departments and categories into the database.
     """
+    dept_count = db.query(Department).count()
+    cat_count = db.query(Category).count()
+    if dept_count >= len(INITIAL_DEPARTMENTS) and cat_count >= len(INITIAL_CATEGORIES):
+        return
+
     dept_map: dict[str, Department] = {}
 
     for d_data in INITIAL_DEPARTMENTS:
@@ -134,7 +139,7 @@ def get_active_categories(db: Session) -> list[Category]:
     """
     return (
         db.query(Category)
-        .join(Category.department)
+        .options(joinedload(Category.department))
         .filter(Category.is_active.is_(True))
         .order_by(Category.id.asc())
         .all()

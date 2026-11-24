@@ -311,6 +311,16 @@ export const adminService = {
    * @returns {Promise<Object>} Real counts and priority queues
    */
   getDashboardMetrics: async () => {
+    // 1. High-efficiency consolidated endpoint (1 single round-trip)
+    try {
+      const res = await api.get("/complaints/admin/metrics");
+      if (res?.data) {
+        return res.data;
+      }
+    } catch {
+      // Graceful fallback to individual queries if backend is on earlier version
+    }
+
     // Parallel queries to fetch true counts by lifecycle status
     const [
       totalRes,

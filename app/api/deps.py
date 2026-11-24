@@ -18,7 +18,7 @@ from typing import Callable
 import jwt
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.constants import UserRole
 from app.core.exceptions import AuthenticationError, AuthorizationError
@@ -78,7 +78,12 @@ def get_current_user(
     except (ValueError, TypeError):
         raise AuthenticationError("Malformed user identifier in authentication token")
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.id == user_id)
+        .first()
+    )
     if not user:
         raise AuthenticationError("Authenticated user account no longer exists")
 

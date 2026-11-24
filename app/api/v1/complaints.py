@@ -18,7 +18,8 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import get_current_active_user, require_admin, require_citizen
 from app.core.constants import ComplaintStatus, PriorityLevel
@@ -279,6 +280,81 @@ def get_followed_complaints(
             total_pages=total_pages,
             items=items,
         ).model_dump(),
+    )
+
+
+# =============================================================================
+# Admin Consolidated Dashboard Metrics (Must precede /{complaint_id})
+# =============================================================================
+
+@router.get(
+    "/admin/metrics",
+    status_code=status.HTTP_200_OK,
+    response_model=StandardResponse,
+    summary="Get consolidated administrator dashboard metrics",
+    description="High-performance single-query status counts, recent complaints, and critical complaints.",
+)
+def get_admin_dashboard_metrics(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+) -> StandardResponse:
+    """
+    Retrieve consolidated metrics for the administrator dashboard in a single round-trip.
+    """
+    stmt = select(
+        func.count().label("total"),
+        func.count().filter(Complaint.status == ComplaintStatus.SUBMITTED).label("submitted"),
+        func.count().filter(Complaint.status == ComplaintStatus.UNDER_REVIEW).label("under_review"),
+        func.count().filter(Complaint.status == ComplaintStatus.ASSIGNED).label("assigned"),
+        func.count().filter(Complaint.status == ComplaintStatus.IN_PROGRESS).label("in_progress"),
+        func.count().filter(Complaint.status == ComplaintStatus.RESOLVED_AWAITING_VERIFICATION).label("resolved"),
+        func.count().filter(Complaint.status == ComplaintStatus.CLOSED).label("closed"),
+        func.count().filter(Complaint.status == ComplaintStatus.REJECTED).label("rejected"),
+    )
+    row = db.execute(stmt).one()
+
+    recent_complaints = (
+        db.query(Complaint)
+        .options(
+            joinedload(Complaint.category).joinedload(Category.department),
+            joinedload(Complaint.citizen),
+            joinedload(Complaint.location),
+        )
+        .order_by(Complaint.created_at.desc())
+        .limit(6)
+        .all()
+    )
+
+    urgent_complaints = (
+        db.query(Complaint)
+        .options(
+            joinedload(Complaint.category).joinedload(Category.department),
+            joinedload(Complaint.citizen),
+            joinedload(Complaint.location),
+        )
+        .filter(Complaint.priority == PriorityLevel.CRITICAL)
+        .order_by(Complaint.created_at.desc())
+        .limit(5)
+        .all()
+    )
+
+    metrics_data = {
+        "total": row.total or 0,
+        "submitted": row.submitted or 0,
+        "underReview": row.under_review or 0,
+        "assigned": row.assigned or 0,
+        "inProgress": row.in_progress or 0,
+        "resolvedAwaitingVerification": row.resolved or 0,
+        "closed": row.closed or 0,
+        "rejected": row.rejected or 0,
+        "recentComplaints": [_format_complaint(c) for c in recent_complaints],
+        "urgentComplaints": [_format_complaint(c) for c in urgent_complaints],
+    }
+
+    return StandardResponse(
+        success=True,
+        message="Administrator metrics retrieved successfully",
+        data=metrics_data,
     )
 
 
